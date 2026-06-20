@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Base de Connaissances IT - Tickets & Solutions</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+    :root {
+        --primary: #4f46e5;
+        --primary-dark: #4338ca;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --danger: #ef4444;
+    }
+    
+    * {
+        scroll-behavior: smooth;
+    }
+    
+    body {
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+    
+    .glass {
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+    }
+    
+    .gradient-bg {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    
+    .card-hover {
+        transition: all 0.3s ease;
+    }
+    
+    .card-hover:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+    
+    .tab-active {
+        color: var(--primary);
+        border-bottom: 2px solid var(--primary);
+    }
+    
+    .status-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+    .priority-basse {
+    background: #e5e7eb;
+    color: #374151;
+}
+
+.priority-moyenne {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.priority-haute {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.priority-critique {
+    background: #fee2e2;
+    color: #991b1b;
+}
+    .status-nouveau { background: #dbeafe; color: #1e40af; }
+    .status-en-cours { background: #fef3c7; color: #92400e; }
+    .status-resolu { background: #d1fae5; color: #065f46; }
+    .status-ferme { background: #e5e7eb; color: #374151; }
+    
+    input:focus, textarea:focus, select:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    }
+    
+    .fade-in {
+        animation: fadeIn 0.3s ease-in;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .toast {
+        animation: slideIn 0.3s ease-out;
+    }
+    
+    @keyframes slideIn {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    
+    .google-btn {
+        border: 1px solid #dadce0;
+        color: #3c4043;
+        background: white;
+    }
+    
+    .google-btn:hover {
+        border: 1px solid #d2e3fc;
+        background: #f8f9fa;
+    }
+    
+    ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+    
+    ::-webkit-scrollbar-track {
+        background: #f1f5f9;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 4px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+    }
+    
+    @media (max-width: 390px) {
+        .text-responsive {
+            font-size: 0.875rem;
+        }
+        .btn-stack {
+            flex-direction: column;
+        }
+    }
+</style>
+</head>
+<body class="bg-slate-50 min-h-screen">
+    <!-- Header -->
+    <header class="gradient-bg shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-lg">
+                        <i class="fa-solid fa-layer-group text-2xl text-indigo-600"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl sm:text-3xl font-bold text-white">Base de Connaissances IT</h1>
+                        <p class="text-indigo-100 text-sm">Gestion tickets & solutions</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="flex items-center gap-2 text-white">
+                        <i class="fa-regular fa-clock"></i>
+                        <span id="currentTime" class="text-sm font-medium"></span>
+                    </div>
+                    <button onclick="downloadJSON()" class="bg-white/20 hover:bg-white/30 text-white px-3 py-2 rounded-lg transition text-sm">
+                        <i class="fa-solid fa-download mr-1"></i>Export
+                    </button>
+                    <label class="bg-white/20 hover:bg-white/30 text-white px-3 py-2 rounded-lg transition text-sm cursor-pointer">
+                        <i class="fa-solid fa-upload mr-1"></i>Import
+                        <input type="file" accept=".json" onchange="importJSON(event)" class="hidden">
+                    </label>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex overflow-x-auto no-scrollbar gap-1">
+                <button class="tab-btn tab-active px-4 sm:px-6 py-4 font-medium text-sm sm:text-base whitespace-nowrap transition-colors" data-tab="dashboard">
+                    <i class="fa-solid fa-chart-line mr-2"></i>Dashboard
+                </button>
+                <button class="tab-btn px-4 sm:px-6 py-4 font-medium text-slate-600 hover:text-indigo-600 text-sm sm:text-base whitespace-nowrap transition-colors" data-tab="new-ticket">
+                    <i class="fa-solid fa-plus mr-2"></i>Nouveau ticket
+                </button>
+                <button class="tab-btn px-4 sm:px-6 py-4 font-medium text-slate-600 hover:text-indigo-600 text-sm sm:text-base whitespace-nowrap transition-colors" data-tab="knowledge">
+                    <i class="fa-solid fa-book mr-2"></i>Base de connaissances
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        
+        <!-- 1. Dashboard Tab -->
+        <div id="dashboard" class="tab-content fade-in">
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold text-slate-800 mb-2">Vue d'ensemble</h2>
+                <p class="text-slate-600">Statistiques et insights de votre base de connaissances</p>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
+                <div class="bg-white rounded-2xl shadow-md p-6 card-hover border border-slate-100">
+                    <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                            <p class="text-slate-500 text-sm font-medium mb-1">Total Tickets</p>
+                            <h3 id="totalTickets" class="text-3xl font-bold text-slate-800">0</h3>
+                            <p class="text-emerald-600 text-xs mt-2">
+                                <i class="fa-solid fa-arrow-trend-up mr-1"></i>+12% ce mois
+                            </p>
+                        </div>
+                        <div class="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center">
+                            <i class="fa-solid fa-ticket text-indigo-600 text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-md p-6 card-hover border border-slate-100">
+                    <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                            <p class="text-slate-500 text-sm font-medium mb-1">Résolus</p>
+                            <h3 id="resolvedTickets" class="text-3xl font-bold text-slate-800">0</h3>
+                            <p class="text-emerald-600 text-xs mt-2">
+                                <i class="fa-solid fa-check mr-1"></i>Taux: <span id="resolveRate">0%</span>
+                            </p>
+                        </div>
+                        <div class="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center">
+                            <i class="fa-solid fa-circle-check text-emerald-600 text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-md p-6 card-hover border border-slate-100">
+                    <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                            <p class="text-slate-500 text-sm font-medium mb-1">En cours</p>
+                            <h3 id="inProgressTickets" class="text-3xl font-bold text-slate-800">0</h3>
+                            <p class="text-amber-600 text-xs mt-2">
+                                <i class="fa-solid fa-spinner mr-1"></i>À traiter
+                            </p>
+                        </div>
+                        <div class="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center">
+                            <i class="fa-solid fa-hourglass-half text-amber-600 text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-md p-6 card-hover border border-slate-100">
+                    <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                            <p class="text-slate-500 text-sm font-medium mb-1">Nouveaux</p>
+                            <h3 id="newTickets" class="text-3xl font-bold text-slate-800">0</h3>
+                            <p class="text-blue-600 text-xs mt-2">
+                                <i class="fa-solid fa-bell mr-1"></i>Aujourd'hui
+                            </p>
+                        </div>
+                        <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                            <i class="fa-solid fa-inbox text-blue-600 text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Tickets -->
+            <div class="bg-white rounded-2xl shadow-md border border-slate-100 overflow-hidden">
+                <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between flex-wrap gap-3">
+                    <h3 class="text-lg font-semibold text-slate-800">
+                        <i class="fa-solid fa-clock-rotate-left text-indigo-600 mr-2"></i>Tickets récents
+                    </h3>
+                    <button onclick="switchTab('knowledge')" class="text-sm text-indigo-600 hover:text-indigo-700 font-medium">
+                        Voir tout <i class="fa-solid fa-arrow-right ml-1"></i>
+                    </button>
+                </div>
+                <div id="recentTicketsList" class="divide-y divide-slate-100">
+                    <div class="px-6 py-12 text-center text-slate-400">
+                        <i class="fa-regular fa-folder-open text-4xl mb-3"></i>
+                        <p>Aucun ticket récent</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Nouveau Ticket Tab -->
+        <div id="new-ticket" class="tab-content hidden">
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold text-slate-800 mb-2">Créer un nouveau ticket</h2>
+                <p class="text-slate-600">Renseignez toutes les informations du problème rencontré</p>
+            </div>
+
+            <form id="ticketForm" class="bg-white rounded-2xl shadow-md border border-slate-100 p-6 sm:p-8">
+                <input type="hidden" name="editId" id="editId">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Souci -->
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">
+                            <i class="fa-solid fa-triangle-exclamation text-amber-500 mr-1"></i>Souci / Problème *
+                        </label>
+                        <input type="text" name="souci" id="souciInput" required
+                            class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 transition"
+                            placeholder="Ex: Impossible de se connecter à l'application">
+                    </div>
+
+                    <!-- Détail -->
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">
+                            <i class="fa-solid fa-align-left text-indigo-500 mr-1"></i>Détail du problème *
+                        </label>
+                        <div class="relative">
+                            <textarea name="detail" id="detailInput" required rows="4"
+                                class="w-full px-4 py-3 pr-12 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 transition resize-none"
+                                placeholder="Décrivez le problème en détail : messages d'erreur, étapes pour reproduire, impact..."></textarea>
+                            <button type="button" onclick="rephraseText('detailInput')" 
+                                class="absolute top-3 right-3 text-indigo-600 hover:text-indigo-700 p-2 rounded-lg hover:bg-indigo-50 transition"
+                                title="Reformuler avec IA">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Solution -->
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">
+                            <i class="fa-solid fa-lightbulb text-emerald-500 mr-1"></i>Solution / Résolution
+                        </label>
+                        <div class="relative">
+                            <textarea name="solution" id="solutionInput" rows="3"
+                                class="w-full px-4 py-3 pr-12 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 transition resize-none"
+                                placeholder="Si la solution est connue, décrivez-la ici..."></textarea>
+                            <button type="button" onclick="rephraseText('solutionInput')" 
+                                class="absolute top-3 right-3 text-indigo-600 hover:text-indigo-700 p-2 rounded-lg hover:bg-indigo-50 transition"
+                                title="Reformuler avec IA">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                            </button>
+                        </div>
+                    </div>
+						<!-- Catégorie -->
+							<div>
+								<label class="block text-sm font-semibold text-slate-700 mb-2">
+									<i class="fa-solid fa-tags text-orange-500 mr-1"></i>Catégorie *
+								</label>
+								<select name="categorie" id="categorie" class="w-full px-4 py-3 border border-slate-300 rounded-xl">
+									<option value="">Choisir une catégorie</option>
+									<option>Application</option>
+									<option>Messagerie</option>
+									<option>VPN</option>
+									<option>Réseau</option>
+									<option>Compte utilisateur</option>
+									<option>Matériel</option>
+									<option>Impression</option>
+									<option>Sécurité</option>
+									<option>Autre</option>
+								</select>
+							</div>
+                    <!-- Outils -->
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">
+                            <i class="fa-solid fa-toolbox text-purple-500 mr-1"></i>Outils / Logiciels concernés
+                        </label>
+                        <input type="text" name="outils"
+                            class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 transition"
+                            placeholder="Ex: SAP, Outlook, VPN">
+                    </div>
+
+                    <!-- Demandeur -->
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">
+                            <i class="fa-solid fa-user text-blue-500 mr-1"></i>Demandeur *
+                        </label>
+                        <input type="text" name="demandeur" required
+                            class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 transition"
+                            placeholder="Nom du demandeur">
+                    </div>
+
+                    <!-- Lien BMC -->
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">
+                            <i class="fa-solid fa-link text-teal-500 mr-1"></i>Lien BMC
+                        </label>
+                        <input type="url" name="lienBMC"
+                            class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 transition"
+                            placeholder="https://bmc.example.com/ticket/12345">
+                    </div>
+
+                    <!-- ID -->
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">
+                            <i class="fa-solid fa-hashtag text-slate-500 mr-1"></i>ID Ticket
+                        </label>
+                        <input type="text" name="id"
+                            class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 transition"
+                            placeholder="Auto-généré si vide">
+                    </div>
+							<!-- Priorité -->
+							<div>
+								<label class="block text-sm font-semibold text-slate-700 mb-2">
+									<i class="fa-solid fa-flag text-red-500 mr-1"></i>Priorité
+								</label>
+								<select name="priorite" id="priorite"
+									class="w-full px-4 py-3 border border-slate-300 rounded-xl">
+									<option>Basse</option>
+									<option>Moyenne</option>
+									<option>Haute</option>
+									<option>Critique</option>
+								</select>
+							</div>
+                    <!-- Statut -->
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">
+                            <i class="fa-solid fa-circle-dot text-pink-500 mr-1"></i>Statut *
+                        </label>
+                        <select name="statut" required
+                            class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 transition">
+                            <option value="nouveau">Nouveau</option>
+                            <option value="en-cours">En cours</option>
+                            <option value="resolu">Résolu</option>
+                            <option value="ferme">Fermé</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Boutons -->
+                <div class="flex flex-col sm:flex-row gap-3 mt-8 pt-6 border-t border-slate-200">
+                    <button type="submit"
+                        class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-xl transition shadow-lg hover:shadow-xl flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-floppy-disk"></i><span id="submitBtnText">Enregistrer le ticket</span>
+                    </button>
+                    <button type="reset" onclick="cancelEdit()"
+                        class="sm:w-auto bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold py-3 px-6 rounded-xl transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-rotate-left"></i>Réinitialiser
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- 3. Base de connaissances Tab -->
+        <div id="knowledge" class="tab-content hidden">
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold text-slate-800 mb-2">Base de connaissances</h2>
+                <p class="text-slate-600">Recherchez et consultez tous les tickets enregistrés</p>
+            </div>
+                <div class="flex flex-col gap-3">
+                    <div class="flex flex-col lg:flex-row gap-3 items-stretch">
+                        <div class="flex-1 relative">
+                            <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                            <input type="text" id="searchInput"
+                                class="w-full pl-12 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 transition"
+                                placeholder="Rechercher par souci, détail, outils, demandeur...">
+                        </div>
+                    </div>
+                    <div class="flex flex-col sm:flex-row gap-3">
+                        <select id="statusFilter"
+                            class="sm:w-48 px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 transition">
+                            <option value="">Tous les statuts</option>
+                            <option value="nouveau">Nouveau</option>
+                            <option value="en-cours">En cours</option>
+                            <option value="resolu">Résolu</option>
+                            <option value="ferme">Fermé</option>
+                        </select>
+						<select id="categoryFilter"
+class="sm:w-48 px-4 py-3 border border-slate-300 rounded-xl">
+
+    <option value="">Toutes les catégories</option>
+    <option value="Application">Application</option>
+    <option value="Messagerie">Messagerie</option>
+    <option value="VPN">VPN</option>
+    <option value="Réseau">Réseau</option>
+    <option value="Compte utilisateur">Compte utilisateur</option>
+    <option value="Matériel">Matériel</option>
+    <option value="Impression">Impression</option>
+    <option value="Sécurité">Sécurité</option>
+    <option value="Autre">Autre</option>
+
+</select>
+
+<select id="priorityFilter"
+class="sm:w-48 px-4 py-3 border border-slate-300 rounded-xl">
+
+    <option value="">Toutes les priorités</option>
+    <option value="Basse">Basse</option>
+    <option value="Moyenne">Moyenne</option>
+    <option value="Haute">Haute</option>
+    <option value="Critique">Critique</option>
+
+</select>
+                        <button onclick="clearSearch()"
+                            class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold py-3 px-6 rounded-xl transition">
+                            <i class="fa-solid fa-xmark mr-1"></i>Effacer
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Liste des tickets -->
+            <div id="ticketsList" class="space-y-4">
+            </div>
+
+            <!-- Message si vide -->
+            <div id="emptyState" class="bg-white rounded-2xl shadow-md border border-slate-100 p-12 text-center hidden">
+                <i class="fa-regular fa-folder-open text-6xl text-slate-300 mb-4"></i>
+                <h3 class="text-xl font-semibold text-slate-700 mb-2">Aucun ticket trouvé</h3>
+                <p class="text-slate-500 mb-6">Aucun ticket. Créez-en un dans Nouveau ticket</p>
+                <button onclick="switchTab('new-ticket')"
+                    class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-xl transition shadow-lg">
+                    <i class="fa-solid fa-plus mr-2"></i>Créer un ticket
+                </button>
+            </div>
+
+            <!-- Recherche Solutions Web si 0 résultat -->
+            <div id="webSearchSection" class="hidden">
+                <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl shadow-md border border-indigo-100 p-6 sm:p-8">
+                    <div class="flex items-start gap-4 mb-6">
+                        <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-md">
+                            <i class="fa-solid fa-globe text-indigo-600 text-xl"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-lg font-bold text-slate-800 mb-1">Aucun résultat dans la base</h3>
+                            <p class="text-slate-600 text-sm">Recherchez une solution sur le web ou ajoutez-en une manuellement</p>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row gap-3 mb-6">
+                        <button onclick="searchGoogle()" 
+                            class="flex-1 bg-white hover:bg-slate-50 text-slate-700 font-semibold py-3 px-6 rounded-xl transition shadow-md hover:shadow-lg flex items-center justify-center gap-2 border border-slate-200">
+                            <svg class="w-5 h-5" viewBox="0 0 24 24">
+                                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                            </svg>
+                            Rechercher sur Google
+                        </button>
+                        <button onclick="searchMetaAI()" 
+                            class="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-xl transition shadow-md hover:shadow-lg flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-robot"></i>
+                            Demander à Meta AI
+                        </button>
+                    </div>
+
+                    <div class="bg-white rounded-xl p-4 border border-slate-200">
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">
+                            <i class="fa-solid fa-pen-to-square text-indigo-500 mr-1"></i>Ajouter une solution manuellement
+                        </label>
+                        <textarea id="manualSolution" rows="4"
+                            class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 transition resize-none mb-3"
+                            placeholder="Collez ou rédigez la solution trouvée sur le web..."></textarea>
+                        <button onclick="addManualSolution()"
+                            class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 px-6 rounded-lg transition">
+                            <i class="fa-solid fa-plus mr-2"></i>Ajouter cette solution
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-6 right-6 z-50 hidden">
+        <div class="bg-slate-800 text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 toast">
+            <i id="toastIcon" class="fa-solid fa-circle-check text-emerald-400"></i>
+            <span id="toastMessage"></span>
+        </div>
+    </div>
+
+    <script>
+        // État global
+        let tickets = JSON.parse(localStorage.getItem('tickets') || '[]');
+        let currentSearchQuery = '';
+        let editingTicketId = null;
+
+        // Init
+        document.addEventListener('DOMContentLoaded', () => {
+            updateTime();
+            setInterval(updateTime, 1000);
+            initTabs();
+            updateDashboard();
+            renderTickets();
+            
+            document.getElementById('ticketForm').addEventListener('submit', handleSubmit);
+            document.getElementById('searchInput').addEventListener('input', handleSearch);
+            document.getElementById('searchInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') searchGoogle();
+            });
+            document.getElementById('statusFilter').addEventListener('change', handleSearch);
+			document.getElementById('categoryFilter').addEventListener('change', handleSearch);
+			document.getElementById('priorityFilter').addEventListener('change', handleSearch);
+        });
+
+        // Heure
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('currentTime').textContent = now.toLocaleTimeString('fr-FR', {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        // Navigation tabs
+        function initTabs() {
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const tab = btn.dataset.tab;
+                    switchTab(tab);
+                });
+            });
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('tab-active');
+                btn.classList.add('text-slate-600');
+            });
+            
+            document.getElementById(tabName).classList.remove('hidden');
+            document.querySelector(`[data-tab="${tabName}"]`).classList.add('tab-active');
+            document.querySelector(`[data-tab="${tabName}"]`).classList.remove('text-slate-600');
+            
+            if (tabName === 'dashboard') updateDashboard();
+            if (tabName === 'knowledge') renderTickets();
+        }
+
+        // Soumission formulaire
+        function handleSubmit(e) {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const editId = formData.get('editId');
+            
+const ticketData = {
+    id: formData.get('id') || generateId(),
+    souci: formData.get('souci'),
+    detail: formData.get('detail'),
+    solution: formData.get('solution') || '',
+    categorie: formData.get('categorie') || '',
+    priorite: formData.get('priorite') || 'Moyenne',
+    outils: formData.get('outils') || '',
+    demandeur: formData.get('demandeur'),
+    lienBMC: formData.get('lienBMC') || '',
+    statut: formData.get('statut'),
+    dateCreation: new Date().toISOString(),
+    dateModification: new Date().toISOString()
+};
+            
+            if (editId) {
+                const index = tickets.findIndex(t => t.id === editId);
+                if (index !== -1) {
+                    ticketData.dateCreation = tickets[index].dateCreation;
+                    tickets[index] = ticketData;
+                    showToast('Ticket modifié avec succès', 'success');
+                }
+                cancelEdit();
+            } else {
+                ticketData.dateCreation = new Date().toISOString();
+                tickets.unshift(ticketData);
+                showToast('Ticket créé avec succès', 'success');
+            }
+            
+            saveTickets();
+            e.target.reset();
+            updateDashboard();
+            switchTab('knowledge');
+        }
+
+        function cancelEdit() {
+            editingTicketId = null;
+            document.getElementById('editId').value = '';
+            document.getElementById('submitBtnText').textContent = 'Enregistrer le ticket';
+            document.getElementById('ticketForm').reset();
+        }
+
+        function editTicket(id) {
+            const ticket = tickets.find(t => t.id === id);
+            if (!ticket) return;
+            
+            editingTicketId = id;
+            document.getElementById('editId').value = id;
+            document.getElementById('submitBtnText').textContent = 'Modifier le ticket';
+            
+            const form = document.getElementById('ticketForm');
+            form.souci.value = ticket.souci;
+            form.detail.value = ticket.detail;
+            form.solution.value = ticket.solution;
+            form.outils.value = ticket.outils;
+            form.demandeur.value = ticket.demandeur;
+            form.lienBMC.value = ticket.lienBMC;
+            form.id.value = ticket.id;
+            form.statut.value = ticket.statut;
+            form.categorie.value = ticket.categorie || '';
+			form.priorite.value = ticket.priorite || 'Moyenne';
+            switchTab('new-ticket');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function generateId() {
+            return 'TKT-' + Date.now().toString(36).toUpperCase();
+        }
+
+        function saveTickets() {
+            localStorage.setItem('tickets', JSON.stringify(tickets));
+        }
+
+        // Dashboard stats
+        function updateDashboard() {
+            const total = tickets.length;
+            const resolved = tickets.filter(t => t.statut === 'resolu').length;
+            const inProgress = tickets.filter(t => t.statut === 'en-cours').length;
+            const newT = tickets.filter(t => t.statut === 'nouveau').length;
+            const rate = total > 0 ? Math.round((resolved / total) * 100) : 0;
+            
+            document.getElementById('totalTickets').textContent = total;
+            document.getElementById('resolvedTickets').textContent = resolved;
+            document.getElementById('inProgressTickets').textContent = inProgress;
+            document.getElementById('newTickets').textContent = newT;
+            document.getElementById('resolveRate').textContent = rate + '%';
+            
+            const recentList = document.getElementById('recentTicketsList');
+            const recent = tickets.slice(0, 5);
+            
+            if (recent.length === 0) {
+                recentList.innerHTML = `
+                    <div class="px-6 py-12 text-center text-slate-400">
+                        <i class="fa-regular fa-folder-open text-4xl mb-3"></i>
+                        <p>Aucun ticket récent</p>
+                    </div>
+                `;
+            } else {
+                recentList.innerHTML = recent.map(t => ticketItemHTML(t, true)).join('');
+            }
+        }
+
+        // Recherche
+        function handleSearch() {
+            currentSearchQuery = document.getElementById('searchInput').value.toLowerCase();
+            renderTickets();
+        }
+
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('statusFilter').value = '';
+            currentSearchQuery = '';
+            renderTickets();
+        }
+
+        // Recherche Google & Meta AI avec le texte de la barre
+        function searchGoogle() {
+            const query = document.getElementById('searchInput').value.trim();
+            if (!query) {
+                showToast('Saisissez un terme de recherche', 'error');
+                return;
+            }
+            window.open(`https://www.google.com/search?q=${encodeURIComponent(query)}`, '_blank');
+        }
+
+        function searchMetaAI() {
+            const query = document.getElementById('searchInput').value.trim();
+            if (!query) {
+                showToast('Saisissez un terme de recherche', 'error');
+                return;
+            }
+            window.open(`https://www.meta.ai/?q=${encodeURIComponent(query)}`, '_blank');
+        }
+
+        function renderTickets() {
+            const searchQuery = document.getElementById('searchInput').value.toLowerCase();
+            const statusFilter = document.getElementById('statusFilter').value;
+			const categoryFilter = document.getElementById('categoryFilter').value;
+			const priorityFilter = document.getElementById('priorityFilter').value;
+            
+            let filtered = tickets.filter(t => {
+				const matchSearch = !searchQuery ||
+    (t.souci || '').toLowerCase().includes(searchQuery) ||
+    (t.detail || '').toLowerCase().includes(searchQuery) ||
+    (t.solution || '').toLowerCase().includes(searchQuery) ||
+    (t.categorie || '').toLowerCase().includes(searchQuery) ||
+    (t.priorite || '').toLowerCase().includes(searchQuery) ||
+    (t.outils || '').toLowerCase().includes(searchQuery) ||
+    (t.demandeur || '').toLowerCase().includes(searchQuery) ||
+    (t.id || '').toLowerCase().includes(searchQuery);
+                const matchStatus =
+    !statusFilter || t.statut === statusFilter;
+
+const matchCategory =
+    !categoryFilter || t.categorie === categoryFilter;
+
+const matchPriority =
+    !priorityFilter || t.priorite === priorityFilter;
+
+return matchSearch &&
+       matchStatus &&
+       matchCategory &&
+       matchPriority;
+            });
+            
+            const listContainer = document.getElementById('ticketsList');
+            const emptyState = document.getElementById('emptyState');
+            const webSearch = document.getElementById('webSearchSection');
+            
+            if (filtered.length === 0) {
+                listContainer.innerHTML = '';
+                if (tickets.length === 0) {
+                    emptyState.classList.remove('hidden');
+                    webSearch.classList.add('hidden');
+                } else {
+                    emptyState.classList.add('hidden');
+                    webSearch.classList.remove('hidden');
+                }
+            } else {
+                emptyState.classList.add('hidden');
+                webSearch.classList.add('hidden');
+                listContainer.innerHTML = filtered.map(t => ticketCardHTML(t)).join('');
+            }
+        }
+
+        // HTML Cards
+        function ticketItemHTML(ticket, compact = false) {
+            const statusClass = `status-${ticket.statut}`;
+            const statusLabel = {
+                'nouveau': 'Nouveau',
+                'en-cours': 'En cours',
+                'resolu': 'Résolu',
+                'ferme': 'Fermé'
+            }[ticket.statut];
+            
+            if (compact) {
+                return `
+                    <div class="px-6 py-4 hover:bg-slate-50 transition cursor-pointer" onclick="viewTicket('${ticket.id}')">
+                        <div class="flex items-start justify-between gap-4">
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center gap-2 mb-1 flex-wrap">
+                                    <span class="font-semibold text-slate-800 truncate">${escapeHtml(ticket.souci)}</span>
+                                    <span class="status-badge ${statusClass}">${statusLabel}</span>
+                                </div>
+                                <p class="text-sm text-slate-500 truncate">${escapeHtml(ticket.demandeur)} • ${formatDate(ticket.dateCreation)}</p>
+                            </div>
+                            <i class="fa-solid fa-chevron-right text-slate-400"></i>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function ticketCardHTML(ticket) {
+            const statusClass = `status-${ticket.statut}`;
+            const statusLabel = {
+                'nouveau': 'Nouveau',
+                'en-cours': 'En cours',
+                'resolu': 'Résolu',
+                'ferme': 'Fermé'
+            }[ticket.statut];
+            
+            return `
+                <div class="bg-white rounded-2xl shadow-md border border-slate-100 overflow-hidden card-hover">
+                    <div class="p-6">
+                        <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-4">
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center gap-2 mb-2 flex-wrap">
+                                    <span class="text-xs font-mono text-slate-500 bg-slate-100 px-2 py-1 rounded">${escapeHtml(ticket.id)}</span>
+                                    <span class="status-badge ${statusClass}">${statusLabel}</span>
+									${ticket.priorite ? ` <span class="status-badge priority-${ticket.priorite.toLowerCase()}"> ${ticket.priorite} </span> ` : ''}
+                                </div>
+                                <h3 class="text-lg font-bold text-slate-800 mb-1 break-words">${escapeHtml(ticket.souci)}</h3>
+                                <p class="text-sm text-slate-500">
+                                    <i class="fa-regular fa-user mr-1"></i>${escapeHtml(ticket.demandeur)} • 
+                                    <i class="fa-regular fa-calendar mr-1"></i>${formatDate(ticket.dateCreation)}
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-3 text-sm">
+                            <div>
+                                <p class="font-semibold text-slate-700 mb-1"><i class="fa-solid fa-align-left text-indigo-500 mr-1"></i>Détail</p>
+                                <p class="text-slate-600 bg-slate-50 p-3 rounded-lg break-words whitespace-pre-wrap">${escapeHtml(ticket.detail)}</p>
+                            </div>
+                            
+                            ${ticket.solution ? `
+                                <div>
+                                    <p class="font-semibold text-slate-700 mb-1"><i class="fa-solid fa-lightbulb text-emerald-500 mr-1"></i>Solution</p>
+                                    <p class="text-slate-600 bg-emerald-50 p-3 rounded-lg break-words whitespace-pre-wrap">${escapeHtml(ticket.solution)}</p>
+                                </div>
+                            ` : ''}
+                            
+                            ${ticket.outils ? `
+                                <div>
+                                    <p class="font-semibold text-slate-700 mb-1"><i class="fa-solid fa-toolbox text-purple-500 mr-1"></i>Outils</p>
+                                    <p class="text-slate-600">${escapeHtml(ticket.outils)}</p>
+                                </div>
+                            ` : ''}
+                        </div>
+                        
+                        <div class="flex flex-wrap gap-2 mt-4 pt-4 border-t border-slate-100">
+                            <button onclick="editTicket('${ticket.id}')"
+                                class="text-indigo-600 hover:bg-indigo-50 px-4 py-2 rounded-lg transition text-sm font-medium">
+                                <i class="fa-solid fa-pen-to-square mr-1"></i>Modifier
+                            </button>
+                            ${ticket.lienBMC ? `
+                                <a href="${escapeHtml(ticket.lienBMC)}" target="_blank" rel="noopener"
+                                    class="text-teal-600 hover:bg-teal-50 px-4 py-2 rounded-lg transition text-sm font-medium inline-flex items-center">
+                                    <i class="fa-solid fa-external-link mr-1"></i>Ouvrir BMC
+                                </a>
+                            ` : ''}
+                            <button onclick="deleteTicket('${ticket.id}')"
+                                class="text-red-600 hover:bg-red-50 px-4 py-2 rounded-lg transition text-sm font-medium ml-auto">
+                                <i class="fa-solid fa-trash-can mr-1"></i>Supprimer
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function viewTicket(id) {
+            switchTab('knowledge');
+            document.getElementById('searchInput').value = id;
+            handleSearch();
+        }
+        function deleteTicket(id) {
+            if (confirm('Supprimer ce ticket définitivement ?')) {
+                tickets = tickets.filter(t => t.id !== id);
+                saveTickets();
+                renderTickets();
+                updateDashboard();
+                showToast('Ticket supprimé', 'success');
+            }
+        }
+
+        // Reformuler IA - simulation
+        function rephraseText(fieldId) {
+            const field = document.getElementById(fieldId);
+            const text = field.value.trim();
+            
+            if (!text) {
+                showToast('Aucun texte à reformuler', 'error');
+                return;
+            }
+            
+            showToast('Reformulation en cours...', 'success');
+            
+            // Simulation de reformulation IA
+            setTimeout(() => {
+                const reformulated = `[Reformulé] ${text.charAt(0).toUpperCase()}${text.slice(1)}. Formulation professionnelle et claire.`;
+                field.value = reformulated;
+                showToast('Texte reformulé avec succès', 'success');
+            }, 1000);
+        }
+
+        // Solution manuelle
+        function addManualSolution() {
+            const solution = document.getElementById('manualSolution').value.trim();
+            const query = document.getElementById('searchInput').value.trim();
+            
+            if (!solution) {
+                showToast('Veuillez saisir une solution', 'error');
+                return;
+            }
+            
+            const ticket = {
+                id: generateId(),
+                souci: query || 'Solution web partagée',
+                detail: 'Solution trouvée via recherche web externe',
+                solution: solution,
+                outils: 'Web',
+                demandeur: 'Système',
+                lienBMC: '',
+                statut: 'resolu',
+                dateCreation: new Date().toISOString(),
+                dateModification: new Date().toISOString()
+            };
+            
+            tickets.unshift(ticket);
+            saveTickets();
+            document.getElementById('manualSolution').value = '';
+            showToast('Solution ajoutée à la base', 'success');
+            renderTickets();
+            updateDashboard();
+        }
+
+        // Export/Import
+        function downloadJSON() {
+            const dataStr = JSON.stringify(tickets, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `tickets_backup_${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            URL.revokeObjectURL(url);
+            showToast('Export terminé', 'success');
+        }
+
+        function importJSON(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    if (Array.isArray(imported)) {
+                        if (confirm(`Importer ${imported.length} tickets ? Cela remplacera les données actuelles.`)) {
+                            tickets = imported;
+                            saveTickets();
+                            updateDashboard();
+                            renderTickets();
+                            showToast('Import réussi', 'success');
+                        }
+                    } else {
+                        showToast('Format JSON invalide', 'error');
+                    }
+                } catch (err) {
+                    showToast('Erreur lors de l\'import', 'error');
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+
+        // Utils
+        function formatDate(iso) {
+            const date = new Date(iso);
+            return date.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' });
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const icon = document.getElementById('toastIcon');
+            const msg = document.getElementById('toastMessage');
+            
+            msg.textContent = message;
+            icon.className = type === 'success' 
+                ? 'fa-solid fa-circle-check text-emerald-400'
+                : 'fa-solid fa-circle-exclamation text-amber-400';
+            
+            toast.classList.remove('hidden');
+            setTimeout(() => toast.classList.add('hidden'), 3000);
+        }
+    </script>
+<script>(function(){document.addEventListener("click",function(e){var a=e.target.closest("[data-product-id]");if(!a)return;e.preventDefault();var pid=a.getAttribute("data-product-id");if(pid)parent.postMessage({type:"ecto-artifact-link-click",productId:pid},"*")})})();</script>
+</body>
+</html>
