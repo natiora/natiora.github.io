@@ -6,6 +6,7 @@
 <meta name="description" content="Natiora Rahariniaina — IT Support Technician & SysAdmin Linux/Windows avec 5+ ans d'expérience. Basé à Antananarivo, Madagascar.">
 <title>Natiora Rahariniaina | IT Support Technician</title>
 <script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -366,10 +367,10 @@ h1, h2, h3, h4 { font-family: 'Space Grotesk', sans-serif; }
             <a href="#stack"      class="mobile-link text-lg font-medium" style="color:var(--text-secondary)">Stack</a>
             <a href="#experience" class="mobile-link text-lg font-medium" style="color:var(--text-secondary)">Experience</a>
             <a href="#contact"    class="mobile-link text-lg font-medium" style="color:var(--text-secondary)">Contact</a>
-            <a href="cv-natiora-rahariniaina.pdf" download
-               class="mt-4 px-5 py-3 rounded-full bg-gradient-to-r from-violet-600 to-blue-600 text-white text-sm font-semibold text-center">
-                <i class="fas fa-download mr-2"></i>Download CV
-            </a>
+            <button download
+               class="mt-4 px-5 py-3 rounded-full bg-gradient-to-r from-violet-600 to-blue-600 text-white text-sm font-semibold text-center" class="download-pdf-btn>
+                <i class="fas fa-download mr-2" ></i>Download CV
+            </button>
         </div>
     </div>
 </div>
@@ -428,10 +429,9 @@ h1, h2, h3, h4 { font-family: 'Space Grotesk', sans-serif; }
                        class="px-7 py-3.5 rounded-full bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-500 hover:to-blue-500 transition-all duration-300 text-white font-semibold shadow-lg shadow-violet-600/30 text-sm">
                         Let's Work Together
                     </a>
-                    <a href="cv-natiora-rahariniaina.pdf" download
-                       class="px-7 py-3.5 rounded-full glass glass-hover font-semibold text-sm flex items-center gap-2" style="color:var(--text-primary)">
+                    <button download class="px-7 py-3.5 rounded-full glass glass-hover font-semibold text-sm flex items-center gap-2" style="color:var(--text-primary)" id="downloadPDF">
                         <i class="fas fa-download text-violet-400"></i> Download CV
-                    </a>
+                    </button>
                 </div>
             </div>
 
@@ -489,7 +489,7 @@ h1, h2, h3, h4 { font-family: 'Space Grotesk', sans-serif; }
         </div>
     </div>
 </section>
-
+<div id="cv-a-exporter">
 <!-- ============================================================
      ABOUT
      ============================================================ -->
@@ -871,6 +871,7 @@ h1, h2, h3, h4 { font-family: 'Space Grotesk', sans-serif; }
         </div>
     </div>
 </section>
+</div>
 
 <!-- ============================================================
      CONTACT
@@ -1061,6 +1062,44 @@ const staggerObs = new IntersectionObserver((entries) => {
     });
 }, { threshold: 0.08 });
 document.querySelectorAll('.stagger-group').forEach(g => staggerObs.observe(g));
+// Attendre que le DOM soit chargé
+document.addEventListener('DOMContentLoaded', function() {
+  const btn = document.getElementById('downloadPDF');
+  
+  btn?.addEventListener('click', function(e) {
+    e.preventDefault(); // Empêche tout comportement par défaut
+    
+    const element = document.getElementById('cv-a-exporter');
+    if (!element) {
+      console.log('Element cv-a-exporter introuvable');
+      return;
+    }
+    
+    // Loader visuel
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Génération...';
+    btn.disabled = true;
+    
+    const opt = {
+      margin: [10, 10, 10, 10],
+      filename: `CV-Natiora-${new Date().getFullYear()}.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { 
+        scale: 2, 
+        useCORS: true,
+        onclone: (clonedDoc) => {
+          clonedDoc.documentElement.setAttribute('data-theme', 'light');
+        }
+      },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+    
+    html2pdf().set(opt).from(element).save().then(() => {
+      // Remet le bouton normal
+      btn.innerHTML = '<i class="fas fa-file-pdf text-red-400"></i> Download PDF';
+      btn.disabled = false;
+    });
+  });
+});
 </script>
 </body>
 </html>
